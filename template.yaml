@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Simple Serverless Pipeline (S3 + Lambda + DynamoDB)
+Description: Simple Serverless Pipeline (S3 + Lambda + DynamoDB + SNS)
 
 Parameters:
   LambdaCodeBucket:
@@ -9,11 +9,21 @@ Parameters:
     Type: String
     Default: lambda.zip
 
+  NotificationEmail:
+    Type: String
+    Description: Email address for SNS notifications
+
 Resources:
 
+  ############################
+  # S3 BUCKET
+  ############################
   StudentUploadBucket:
     Type: AWS::S3::Bucket
 
+  ############################
+  # DYNAMODB TABLE
+  ############################
   StudentsTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -28,6 +38,27 @@ Resources:
         - AttributeName: studentId
           KeyType: HASH
 
+  ############################
+  # SNS TOPIC
+  ############################
+  StudentSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: StudentProcessingTopic
+
+  ############################
+  # SNS SUBSCRIPTION (EMAIL)
+  ############################
+  StudentEmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      Endpoint: !Ref NotificationEmail
+      TopicArn: !Ref StudentSNSTopic
+
+  ############################
+  # IAM ROLE FOR LAMBDA
+  ############################
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -47,16 +78,28 @@ Resources:
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
+
+              # S3 Read Access
               - Effect: Allow
                 Action:
                   - s3:GetObject
                 Resource: "*"
 
+              # DynamoDB Write Access
               - Effect: Allow
                 Action:
                   - dynamodb:PutItem
                 Resource: !GetAtt StudentsTable.Arn
 
+              # SNS Publish Permission
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref StudentSNSTopic
+
+  ############################
+  # LAMBDA FUNCTION
+  ############################
   ProcessCSVLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -66,9 +109,25 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
 
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref StudentsTable
+          SNS_TOPIC_ARN: !Ref StudentSNSTopic
+
       Code:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
+
+  ############################
+  # S3 TRIGGER FOR LAMBDA
+  ############################
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ProcessCSVLambda
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt StudentUploadBucket.Arn
 
 Outputs:
 
@@ -80,3 +139,6 @@ Outputs:
 
   TableName:
     Value: !Ref StudentsTable
+
+  SNSTopicArn:
+    Value: !Ref StudentSNSTopic
