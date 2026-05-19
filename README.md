@@ -1,109 +1,137 @@
-☁️ Serverless CSV Processing Pipeline using AWS (S3 + Lambda + DynamoDB + SNS)
+# ☁️ Serverless CSV Processing Pipeline (AWS S3 + Lambda + DynamoDB + SNS)
 
-📌 Project Overview  
-This project was developed as part of a Cloud Computing & Data Engineering learning track.
+---
 
-The objective of this project is to design and implement a fully serverless data processing pipeline using AWS services that automatically processes CSV files uploaded to an S3 bucket, stores structured data into DynamoDB, and sends real-time email notifications using SNS.
+## 📌 Project Overview
 
-The solution focuses on:  
-- Automating data ingestion using event-driven architecture  
-- Processing structured CSV data using AWS Lambda  
-- Storing processed data in DynamoDB  
-- Enabling real-time notifications using SNS  
-- Deploying infrastructure using CloudFormation (Infrastructure as Code)  
+This project was developed as part of a **Cloud Computing & Data Engineering learning track**.
 
-🎯 Project Goal  
-The primary goal of this project is to eliminate manual data processing and build a scalable, automated cloud-based pipeline for handling structured CSV data.
+The objective is to design and implement a **fully serverless data processing pipeline on AWS** that automatically processes CSV files uploaded to Amazon S3, stores structured data in DynamoDB, and sends real-time email notifications using SNS.
 
-The system provides:  
-- Automated file processing  
-- Real-time data storage  
+### 🔧 Key Capabilities
+- Event-driven data ingestion using S3  
+- CSV processing using AWS Lambda  
+- Structured data storage in DynamoDB  
+- Real-time notifications using SNS  
+- Infrastructure automation using CloudFormation (IaC)  
+
+---
+
+## 🎯 Project Goal
+
+To eliminate manual data processing and build a **scalable, automated cloud-native pipeline** for handling structured CSV data.
+
+### ✔️ System Benefits
+- Fully automated file processing  
+- Real-time data persistence  
 - Notification-based monitoring  
-- Scalable serverless architecture  
-- Infrastructure automation using IaC  
+- Highly scalable serverless architecture  
+- Infrastructure as Code (IaC)  
 
-🚩 Business Problem  
-Organizations often face challenges such as:  
+---
+
+## 🚩 Business Problem
+
+Organizations often face challenges such as:
+
 - Manual processing of uploaded files  
-- Delayed data availability for analysis  
-- Lack of automated notifications on data ingestion  
-- Inefficient and error-prone data entry workflows  
-- Difficulty in scaling traditional ETL systems  
+- Delayed data availability for analytics  
+- Lack of real-time ingestion notifications  
+- Error-prone data entry workflows  
+- Difficulty scaling traditional ETL systems  
 
-This project addresses these challenges by implementing a fully automated AWS-based pipeline.
+### 💡 Solution
+This project solves these challenges using an **event-driven AWS serverless architecture**.
 
-👨‍💻 My Role  
-Cloud Developer – Serverless Data Pipeline Implementation  
+---
 
-Responsibilities:  
-- Designed and implemented AWS serverless architecture  
+## 👨‍💻 My Role
+
+**Cloud Developer – Serverless Data Pipeline Implementation**
+
+### Responsibilities
+- Designed AWS serverless architecture  
 - Developed Lambda function for CSV processing  
-- Configured S3 event-driven triggers  
+- Configured S3 event triggers  
 - Designed DynamoDB schema for structured storage  
 - Integrated SNS for email notifications  
-- Built CloudFormation template for infrastructure automation  
+- Built CloudFormation templates (IaC)  
 - Configured IAM roles and permissions  
 
-🏗️ Solution Architecture  
-AWS Components:  
-Amazon S3 → File storage & event trigger  
-AWS Lambda → CSV processing engine  
-Amazon DynamoDB → Data storage layer  
-Amazon SNS → Notification system  
-AWS IAM → Security & access control  
-AWS CloudFormation → Infrastructure as Code  
+---
 
-📊 Dataset  
-studentId,name,department,marks  
-101,John,IT,85  
-102,Alice,CSE,91  
-103,Bob,ECE,78  
+## 🏗️ Solution Architecture
 
-🗄️ DynamoDB Schema  
-Field | Type | Key Type  
-studentId | String | Partition Key  
-name | String | -  
-department | String | -  
-marks | Number | -  
+### 🔹 AWS Components
 
-🔔 Notification System (SNS)  
-After successful processing of the CSV file:  
-- Lambda publishes a message to SNS topic  
-- SNS sends an email notification to subscribed users  
-- Users must confirm email subscription once during setup  
+- **Amazon S3** → File storage & event trigger  
+- **AWS Lambda** → CSV processing engine  
+- **Amazon DynamoDB** → NoSQL data storage  
+- **Amazon SNS** → Notification service  
+- **AWS IAM** → Security & access control  
+- **AWS CloudFormation** → Infrastructure as Code  
 
-📧 Example Notification:  
+---
+
+## 📊 Dataset
+
+```csv
+studentId,name,department,marks
+101,John,IT,85
+102,Alice,CSE,91
+103,Bob,ECE,78
+
+## 🗄️ DynamoDB Schema
+
+| Field      | Type   | Key Type      |
+| ---------- | ------ | ------------- |
+| studentId  | String | Partition Key |
+| name       | String | -             |
+| department | String | -             |
+| marks      | Number | -             |
+
+
+## 🔔 Notification System (SNS)
+Workflow
+CSV uploaded to S3
+Lambda processes the file
+Data stored in DynamoDB
+SNS publishes notification
+Email sent to subscribed users
+
+## 📧 Example Notification:
+
 Student CSV processed successfully and data stored in DynamoDB.
 
-🏗️ Infrastructure as Code  
-The entire infrastructure is provisioned using AWS CloudFormation:
+## 🏗️ Infrastructure as Code (CloudFormation)
 
-Resources Created:  
-- S3 Bucket (File upload)  
-- Lambda Function (Processing engine)  
-- DynamoDB Table (Data storage)  
-- SNS Topic (Notification service)  
-- Email Subscription  
-- IAM Roles & Policies  
-- Event Trigger Configuration (S3 → Lambda)  
+All infrastructure is deployed using AWS CloudFormation.
 
-⚙️ Deployment Steps  
+Resources Provisioned
+S3 Bucket (File ingestion)
+Lambda Function (Processing engine)
+DynamoDB Table (Data storage)
+SNS Topic (Notifications)
+IAM Roles & Policies
+S3 → Lambda event trigger
 
-1️⃣ Deploy CloudFormation Stack  
+## ⚙️ Deployment Steps
+1️⃣ Deploy Stack
 aws cloudformation deploy \
   --template-file template.yaml \
+  --stack-name serverless-csv-pipeline \
+  --capabilities CAPABILITY_NAMED_IAM
+2️⃣ Upload File
 
-2️⃣ Upload CSV File  
 Upload students.csv to the S3 bucket.
 
-3️⃣ Execution Flow  
-- S3 triggers Lambda function  
-- Lambda processes CSV data  
-- Data is inserted into DynamoDB  
-- SNS sends email notification  
+3️⃣ Execution Flow
+S3 triggers Lambda
+Lambda processes CSV
+Data inserted into DynamoDB
+SNS sends email notification
 
-📤 Output Example  
-DynamoDB Record:  
+## 📤 Output Example
 {
   "studentId": "101",
   "name": "John",
@@ -111,42 +139,40 @@ DynamoDB Record:
   "marks": 85
 }
 
-🔐 IAM Permissions  
-- s3:GetObject  
-- dynamodb:PutItem  
-- sns:Publish  
-- logs:CreateLogGroup  
-- logs:CreateLogStream  
-- logs:PutLogEvents  
+## 🔐 IAM Permissions
+s3:GetObject
+dynamodb:PutItem
+sns:Publish
+logs:CreateLogGroup
+logs:CreateLogStream
+logs:PutLogEvents
 
-⚠️ Challenges Faced  
-- Configuring S3 event triggers correctly  
-- Handling IAM permission issues  
-- Ensuring correct CSV parsing in Lambda  
-- Managing SNS email confirmation workflow  
+## ⚠️ Challenges Faced
+Configuring S3 event triggers correctly
+Managing IAM permissions for Lambda
+Parsing CSV data in Lambda
+Handling SNS email subscription flow
 
-📈 Future Enhancements  
-- Add duplicate record prevention using conditional writes  
-- Move processed files to archive folder in S3  
-- Add failure alerts via SNS  
-- Integrate AWS Glue for advanced ETL processing  
-- Add API Gateway for data querying  
+## 📈 Future Enhancements
+Add duplicate record prevention (conditional writes)
+Archive processed files in S3
+Add failure alerts via SNS
+Integrate AWS Glue for advanced ETL pipelines
+Add API Gateway for querying data
 
-📚 Key Learnings  
-- Event-driven serverless architecture on AWS  
-- S3 event notifications and Lambda triggers  
-- DynamoDB NoSQL data modeling  
-- SNS-based notification systems  
-- Infrastructure as Code using CloudFormation  
-- End-to-end cloud data pipeline design  
+## 📚 Key Learnings
+Event-driven serverless architecture
+AWS S3 → Lambda integration
+DynamoDB NoSQL design principles
+SNS messaging system
+Infrastructure as Code (CloudFormation)
+End-to-end cloud data pipeline design
 
-👨‍💻 Author  
-Saravanan Nadanasabesan  
-Cloud Computing | Data Engineering | AWS Serverless Architecture  
+## 👨‍💻 Author
 
-GitHub: https://github.com/  
-Email: saravanasabesan@gmail.com  
-LinkedIn: www.linkedin.com/in/saravanan-nadanasabesan-987129107  
+Saravanan Nadanasabesan
+Cloud Computing | Data Engineering | AWS Serverless Architecture
 
-📜 License  
-This project is for educational and portfolio purposes only.
+GitHub: https://github.com/SaravananNadanasabesan
+LinkedIn: https://www.linkedin.com/in/saravanan-nadanasabesan-987129107
+Email: saravanasabesan@gmail.com
