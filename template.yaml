@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Serverless S3 -> Lambda -> DynamoDB Pipeline (Fixed)
+Description: Serverless S3 -> Lambda -> DynamoDB (Stable Version)
 
 Parameters:
   LambdaCodeBucket:
@@ -34,8 +34,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service:
-                - lambda.amazonaws.com
+              Service: lambda.amazonaws.com
             Action: sts:AssumeRole
 
       ManagedPolicyArns:
@@ -47,10 +46,13 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: s3:GetObject
+                Action:
+                  - s3:GetObject
                 Resource: "*"
+
               - Effect: Allow
-                Action: dynamodb:PutItem
+                Action:
+                  - dynamodb:PutItem
                 Resource: !GetAtt StudentsTable.Arn
 
   ProcessCSVLambda:
@@ -65,22 +67,12 @@ Resources:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
 
-  LambdaInvokePermission:
-    Type: AWS::Lambda::Permission
+  LambdaS3Trigger:
+    Type: AWS::Lambda::EventSourceMapping
     Properties:
+      EventSourceArn: !GetAtt StudentUploadBucket.Arn
       FunctionName: !Ref ProcessCSVLambda
-      Action: lambda:InvokeFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt StudentUploadBucket.Arn
-
-  S3LambdaTrigger:
-    Type: AWS::S3::Bucket
-    DependsOn: LambdaInvokePermission
-    Properties:
-      NotificationConfiguration:
-        LambdaConfigurations:
-          - Event: s3:ObjectCreated:Put
-            Function: !GetAtt ProcessCSVLambda.Arn
+      StartingPosition: LATEST
 
 Outputs:
   BucketName:
