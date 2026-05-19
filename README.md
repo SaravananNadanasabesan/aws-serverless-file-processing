@@ -92,8 +92,6 @@ Resources Created:
 1️⃣ Deploy CloudFormation Stack  
 aws cloudformation deploy \
   --template-file template.yaml \
-  --stack-name serverless-csv-pipeline \
-  --capabilities CAPABILITY_NAMED_IAM  
 
 2️⃣ Upload CSV File  
 Upload students.csv to the S3 bucket.
