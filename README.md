@@ -80,7 +80,7 @@ studentId,name,department,marks
 101,John,IT,85
 102,Alice,CSE,91
 103,Bob,ECE,78
-
+```
 ## 🗄️ DynamoDB Schema
 
 | Field      | Type   | Key Type      |
