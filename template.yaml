@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Serverless S3 -> Lambda -> DynamoDB Pipeline (Fixed)
+
+Parameters:
+  LambdaCodeBucket:
+    Type: String
+
+  LambdaCodeKey:
+    Type: String
+    Default: lambda.zip
+
+Resources:
+
+  StudentUploadBucket:
+    Type: AWS::S3::Bucket
+
+  StudentsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Students
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: studentId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: studentId
+          KeyType: HASH
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+      Policies:
+        - PolicyName: LambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: "*"
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt StudentsTable.Arn
+
+  ProcessCSVLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ProcessStudentCSV
+      Runtime: python3.12
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ProcessCSVLambda
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn: !GetAtt StudentUploadBucket.Arn
+
+  S3LambdaTrigger:
+    Type: AWS::S3::Bucket
+    DependsOn: LambdaInvokePermission
+    Properties:
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Function: !GetAtt ProcessCSVLambda.Arn
+
+Outputs:
+  BucketName:
+    Value: !Ref StudentUploadBucket
+
+  TableName:
+    Value: !Ref StudentsTable
+
+  LambdaName:
+    Value: !Ref ProcessCSVLambda
