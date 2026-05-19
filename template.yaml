@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Serverless S3 -> Lambda -> DynamoDB (Stable Version)
+Description: Simple Serverless Pipeline (S3 + Lambda + DynamoDB)
 
 Parameters:
   LambdaCodeBucket:
@@ -19,9 +19,11 @@ Resources:
     Properties:
       TableName: Students
       BillingMode: PAY_PER_REQUEST
+
       AttributeDefinitions:
         - AttributeName: studentId
           AttributeType: S
+
       KeySchema:
         - AttributeName: studentId
           KeyType: HASH
@@ -63,23 +65,18 @@ Resources:
       Handler: lambda_function.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Timeout: 60
+
       Code:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
 
-  LambdaS3Trigger:
-    Type: AWS::Lambda::EventSourceMapping
-    Properties:
-      EventSourceArn: !GetAtt StudentUploadBucket.Arn
-      FunctionName: !Ref ProcessCSVLambda
-      StartingPosition: LATEST
-
 Outputs:
+
   BucketName:
     Value: !Ref StudentUploadBucket
 
-  TableName:
-    Value: !Ref StudentsTable
-
   LambdaName:
     Value: !Ref ProcessCSVLambda
+
+  TableName:
+    Value: !Ref StudentsTable
