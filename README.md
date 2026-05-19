@@ -121,8 +121,8 @@ aws cloudformation deploy \
   --template-file template.yaml \
   --stack-name serverless-csv-pipeline \
   --capabilities CAPABILITY_NAMED_IAM
-2️⃣ Upload File
 
+2️⃣ Upload File
 Upload students.csv to the S3 bucket.
 
 3️⃣ Execution Flow
